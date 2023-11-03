@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@azure/cognitiveservices-computervision": "^8.2.0",
     "@line/bot-sdk": "^8.0.1",
