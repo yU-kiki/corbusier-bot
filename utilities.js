@@ -46,6 +46,18 @@ async function extractTextArrayFromReadResults(readResults) {
   return array;
 }
 
+function isReceipt(textResult) {
+  const keywords = [
+    'レシート', '領収書', '合計', '税込', 'お釣り', '現金', 'クレジットカード', '購入日', '販売'
+  ];
+  const timePattern = /\b([01]?\d|2[0-3]):([0-5]?\d)\b/;
+
+  const containsKeywords = keywords.some(keyword => textResult.includes(keyword));
+  const containsTime = timePattern.test(textResult);
+
+  return containsKeywords && containsTime;
+}
+
 async function convertOCRTextToJSON(content) {
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-0301",
@@ -65,7 +77,8 @@ async function convertOCRTextToJSON(content) {
 
 module.exports = {
   computerVisionClient,
-  convertOCRTextToJSON,
   readTextFromBuffer,
-  extractTextArrayFromReadResults
+  extractTextArrayFromReadResults,
+  isReceipt,
+  convertOCRTextToJSON
 };

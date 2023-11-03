@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { google } = require('googleapis');
 const line = require('@line/bot-sdk');
-const { computerVisionClient, convertOCRTextToJSON, readTextFromBuffer, extractTextArrayFromReadResults } = require('./utilities');
+const { computerVisionClient, readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('./utilities');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -102,45 +102,44 @@ async function replyToLine(event, jsonResult) {
   });
 }
 
+async function fetchImageContent(event) {
+  const stream = await client.getMessageContent(event.message.id);
+  const buffers = [];
+  return new Promise((resolve, reject) => {
+    stream.on('data', (chunk) => buffers.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(Buffer.concat(buffers)));
+  });
+}
+
 async function handleImageMessage(event) {
   try {
-    const stream = await client.getMessageContent(event.message.id);
-
-    const buffers = [];
-    stream.on('data', (chunk) => buffers.push(chunk));
-    stream.on('error', (err) => {
-      throw new Error(err);
-    });
-
-    const buffer = await new Promise((resolve, reject) => {
-      stream.on('end', () => resolve(Buffer.concat(buffers)));
-      stream.on('error', (err) => reject(err));
-    });
+    const buffer = await fetchImageContent(event);
 
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
     const textArray = await extractTextArrayFromReadResults(readResults);
     const textResult = textArray.join('\n');
+    if (!isReceipt(textResult)) {
+      throw new Error('レシートとしての特徴が不足しています。');
+    }
 
     const jsonResultString = await convertOCRTextToJSON(textResult);
-    try {
-      const jsonResult = JSON.parse(jsonResultString);
-      const userName = await getUserName(event);
-      const nameMappings = {
-        'Yuki Ikeda': 'YUKI',
-        '五十嵐   陽唯': 'HARUI',
-        'こう': 'KOH'
-      };
-      const userReName = nameMappings[userName] || userName;
-      jsonResult['ユーザー名'] = userName;
-      jsonResult['変更ユーザー名'] = userReName;
-      await replyToLine(event, jsonResult);
-    } catch (e) {
-      console.error("JSON解析エラー:", e);
-    }
+    const jsonResult = JSON.parse(jsonResultString);
+    const userName = await getUserName(event);
+    const nameMappings = {
+      'Yuki Ikeda': 'YUKI',
+      '五十嵐   陽唯': 'HARUI',
+      'こう': 'KOH'
+    };
+    const userReName = nameMappings[userName] || userName;
+    jsonResult['ユーザー名'] = userName;
+    jsonResult['変更ユーザー名'] = userReName;
+    await replyToLine(event, jsonResult);
   } catch (err) {
-    console.error(err);
+    console.error(`画像メッセージの処理中にエラーが発生しました: ${err.message}`);
   }
 }
+
 
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise.all(req.body.events.map(handleImageMessage))
