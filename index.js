@@ -11,7 +11,7 @@ const config = {
 
 const keyFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const spreadsheetId = process.env.SPREADSHEET_ID;
-const sheetName = '履歴テスト';
+const sheetName = '履歴';
 
 const app = express();
 
