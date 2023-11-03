@@ -45,20 +45,51 @@ async function writeToSheet(jsonResult) {
       values: [
         [
           jsonResult['日時'],
-          `=if(${sheetName}!B${firstEmptyRow}="","", MONTH(${sheetName}!B${firstEmptyRow}))`, // 月
-          'LINE送信者の名前',
+          `=if(${sheetName}!B${firstEmptyRow}="","", MONTH(${sheetName}!B${firstEmptyRow}))`,
+          jsonResult['変更ユーザー名'],
           jsonResult['合計金額'],
           jsonResult['項目'],
-          `${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')}など`, // 内容
+          `【${jsonResult['店名']}】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')}など`,
         ],
       ],
     },
   });
 }
 
+async function getUserName(event) {
+  let name = "匿名ユーザー";
+
+  if (event.source.type === 'user') {
+    const userProfile = await client.getProfile(event.source.userId);
+    name = userProfile.displayName;
+  }
+  else if (event.source.type === 'group') {
+    try {
+      const groupMemberProfile = await client.getGroupMemberProfile(event.source.groupId, event.source.userId);
+      name = groupMemberProfile.displayName;
+    } catch (error) {
+      console.error(`Cannot get group member profile: ${error}`);
+    }
+  }
+  else if (event.source.type === 'room') {
+    try {
+      const roomMemberProfile = await client.getRoomMemberProfile(event.source.roomId, event.source.userId);
+      name = roomMemberProfile.displayName;
+    } catch (error) {
+      console.error(`Cannot get room member profile: ${error}`);
+    }
+  }
+
+  return name;
+}
+
+
 async function replyToLine(event, jsonResult) {
   await writeToSheet(jsonResult);
-  const replyMessage = `以下の内容で登録しました。\n` +
+
+  const mentionText = `@${jsonResult['ユーザー名']}`;
+  const replyMessage = `${mentionText}\n` +
+    `以下の内容で登録しました。\n` +
     `【店名】${jsonResult['店名']}\n` +
     `【日時】${jsonResult['日時']}\n` +
     `【金額】${jsonResult['合計金額']}円\n` +
@@ -93,6 +124,15 @@ async function handleImageMessage(event) {
     const jsonResultString = await convertOCRTextToJSON(textResult);
     try {
       const jsonResult = JSON.parse(jsonResultString);
+      const userName = await getUserName(event);
+      const nameMappings = {
+        'Yuki Ikeda': 'YUKI',
+        '五十嵐   陽唯': 'HARUI',
+        'こう': 'KOH'
+      };
+      const userReName = nameMappings[userName] || userName;
+      jsonResult['ユーザー名'] = userName;
+      jsonResult['変更ユーザー名'] = userReName;
       await replyToLine(event, jsonResult);
     } catch (e) {
       console.error("JSON解析エラー:", e);
