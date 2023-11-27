@@ -9,7 +9,6 @@ const config = {
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
-const keyFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const spreadsheetId = process.env.SPREADSHEET_ID;
 const sheetName = '履歴';
 
@@ -21,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 const client = new line.Client(config);
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: keyFilePath,
+  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
