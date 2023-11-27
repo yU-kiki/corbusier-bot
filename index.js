@@ -45,7 +45,7 @@ async function writeToSheet(jsonResult) {
       values: [
         [
           jsonResult['日時'],
-          `=if(${sheetName}!B${firstEmptyRow}="","", MONTH(${sheetName}!B${firstEmptyRow}))`,
+          `=if(${sheetName}!B${firstEmptyRow}="","", YEAR(${sheetName}!B${firstEmptyRow})*100+MONTH(${sheetName}!B${firstEmptyRow}))`,
           jsonResult['変更ユーザー名'],
           jsonResult['合計金額'],
           jsonResult['項目'],
