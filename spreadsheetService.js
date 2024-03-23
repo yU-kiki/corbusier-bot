@@ -42,12 +42,10 @@ async function saveToSpreadSheet(jsonResult) {
     });
 
     console.log('Successfully saved to SpreadSheet');
+    return { status: 200, message: 'Successfully saved to SpreadSheet' };
   } catch (error) {
     console.error('Error saving data to SpreadSheet:', error);
-    return {
-      status: 500,
-      message: `Error saving data to SpreadSheet: ${error}`,
-    };
+    return { status: 500, message: `Error saving data to SpreadSheet: ${error.message}` };
   }
 }
 
