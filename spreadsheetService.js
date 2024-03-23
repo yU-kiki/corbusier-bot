@@ -9,7 +9,7 @@ async function saveToSpreadSheet(jsonResult) {
       ['https://www.googleapis.com/auth/spreadsheets']
     );
 
-    const sheets = google.sheets({ version: 'v4', auth });
+    const googleSheetsInstance = google.sheets({ version: 'v4', auth });
 
     const spreadsheetId = process.env.SPREADSHEET_ID;
     const sheetName = '履歴';
@@ -32,7 +32,7 @@ async function saveToSpreadSheet(jsonResult) {
       ],
     ];
 
-    await sheets.spreadsheets.values.update({
+    await googleSheetsInstance.spreadsheets.values.update({
       spreadsheetId,
       range,
       valueInputOption: 'USER_ENTERED',
