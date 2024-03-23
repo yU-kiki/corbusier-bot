@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const line = require('@line/bot-sdk');
-const handleImageMessage = require('../handlers/eventHandler');
+const handleImageMessage = require('../src/handlers/eventHandler');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
