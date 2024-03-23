@@ -52,21 +52,26 @@ async function getUserName(event) {
 
 
 async function replyToLine(event, jsonResult) {
-  await writeToSheet(jsonResult);
-
-  const mentionText = `@${jsonResult['ユーザー名']}`;
-  const replyMessage = `${mentionText}\n` +
-    `以下の内容で登録しました。\n` +
-    `【店名】${jsonResult['店名']}\n` +
-    `【日時】${jsonResult['日時']}\n` +
-    `【金額】${jsonResult['合計金額']}円\n` +
-    `【項目】${jsonResult['項目']}\n` +
-    `【内容】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')} など`;
-
+  const replyMessage = 'aaa';
   await client.replyMessage(event.replyToken, {
     type: 'text',
     text: replyMessage
   });
+  // await writeToSheet(jsonResult);
+
+  // const mentionText = `@${jsonResult['ユーザー名']}`;
+  // const replyMessage = `${mentionText}\n` +
+  //   `以下の内容で登録しました。\n` +
+  //   `【店名】${jsonResult['店名']}\n` +
+  //   `【日時】${jsonResult['日時']}\n` +
+  //   `【金額】${jsonResult['合計金額']}円\n` +
+  //   `【項目】${jsonResult['項目']}\n` +
+  //   `【内容】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')} など`;
+
+  // await client.replyMessage(event.replyToken, {
+  //   type: 'text',
+  //   text: replyMessage
+  // });
 }
 
 async function fetchImageContent(event) {
