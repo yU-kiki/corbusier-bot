@@ -1,27 +1,14 @@
-require('dotenv').config();
-const express = require('express');
 const line = require('@line/bot-sdk');
-const { computerVisionClient, readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('../utilities');
-const { saveToSpreadSheet } = require('../spreadsheetService');
+const { readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('../utilities/textExtraction');
+const { saveToSpreadSheet } = require('../services/spreadsheetService');
+const { computerVisionClient } = require('../clients/computerVisionClient');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
-const app = express();
-
-app.use(express.json({ verify: (req, _, buf) => req.rawBody = buf }));
-app.use(express.urlencoded({ extended: true }));
-
 const client = new line.Client(config);
-
-async function writeToSheet(jsonResult) {
-  const result = await saveToSpreadSheet(jsonResult);
-  if (result.status !== 200) {
-    throw new Error(result.message);
-  }
-}
 
 async function getUserName(event) {
   let name = "匿名ユーザー";
@@ -50,6 +37,12 @@ async function getUserName(event) {
   return name;
 }
 
+async function writeToSheet(jsonResult) {
+  const result = await saveToSpreadSheet(jsonResult);
+  if (result.status !== 200) {
+    throw new Error(result.message);
+  }
+}
 
 async function replyToLine(event, jsonResult) {
   await writeToSheet(jsonResult);
@@ -81,7 +74,7 @@ async function fetchImageContent(event) {
 
 async function handleImageMessage(event) {
   try {
-    const buffer = await fetchImageContent(event);
+    const buffer = await fetchImageContent(client, event.message.id);
 
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
     const textArray = await extractTextArrayFromReadResults(readResults);
@@ -107,18 +100,4 @@ async function handleImageMessage(event) {
   }
 }
 
-app.post('/webhook', line.middleware(config), (req, res) => {
-  Promise.all(req.body.events.map(handleImageMessage))
-    .then(() => res.status(200).end())
-    .catch((err) => {
-      console.error(err);
-      res.status(500).end();
-    });
-});
-
-const port = process.env.PORT || 3000;
-// app.listen(port, () => {
-//   console.log(`Server running on port ${port}`);
-// });
-(process.env.NOW_REGION) ? module.exports = app : app.listen(port);
-console.log(`Server running at ${port}`);
+module.exports = { handleImageMessage };
