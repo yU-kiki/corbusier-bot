@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const line = require('@line/bot-sdk');
 const { computerVisionClient, readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('../utilities');
-const { saveToSpreadSheet } = require('./spreadsheetService');
+const { saveToSpreadSheet } = require('../spreadsheetService');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
