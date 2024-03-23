@@ -1,39 +1,47 @@
-const { JWT } = require('google-auth-library');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-
-const serviceAccountAuth = new JWT({
-  email: process.env.GOOGLE_CLIENT_EMAIL,
-  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
-
-const doc = new GoogleSpreadsheet(
-  process.env.SPREADSHEET_ID ?? '',
-  serviceAccountAuth,
-);
+const { google } = require('googleapis');
 
 async function saveToSpreadSheet(jsonResult) {
   try {
-    await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
+    const auth = new google.auth.JWT(
+      process.env.GOOGLE_CLIENT_EMAIL,
+      null,
+      process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      ['https://www.googleapis.com/auth/spreadsheets']
+    );
 
-    if (!sheet) {
-      console.error('Sheet not found.');
-      return { status: 404, message: 'Sheet not found.' };
-    }
+    const sheets = google.sheets({ version: 'v4', auth });
 
-    const rowData = [
-      jsonResult['日時'],
-      `=if(B${sheet.rowCount + 1}="","", YEAR(B${sheet.rowCount + 1})*100+MONTH(B${sheet.rowCount + 1}))`,
-      jsonResult['変更ユーザー名'],
-      jsonResult['合計金額'],
-      jsonResult['項目'],
-      `【${jsonResult['店名']}】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')}など`
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const sheetName = '履歴';
+
+    const getRows = await googleSheetsInstance.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!B:B`,
+    });
+    const firstEmptyRow = getRows.data.values ? getRows.data.values.length + 1 : 1;
+
+    const range = `${sheetName}!B${firstEmptyRow}:G${firstEmptyRow}`
+    const values = [
+      [
+        jsonResult['日時'],
+        `=if(${sheetName}!B${firstEmptyRow}="","", YEAR(${sheetName}!B${firstEmptyRow})*100+MONTH(${sheetName}!B${firstEmptyRow}))`,
+        jsonResult['変更ユーザー名'],
+        jsonResult['合計金額'],
+        jsonResult['項目'],
+        `【${jsonResult['店名']}】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')}など`,
+      ],
     ];
 
-    await sheet.addRow(rowData);
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values,
+      },
+    });
 
-    return { status: 200, message: 'Successfully saved to SpreadSheet' };
+    console.log('Successfully saved to SpreadSheet');
   } catch (error) {
     console.error('Error saving data to SpreadSheet:', error);
     return {
