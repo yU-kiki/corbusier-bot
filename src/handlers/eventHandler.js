@@ -73,19 +73,36 @@ async function fetchImageContent(event) {
 }
 
 async function handleImageMessage(event) {
+  console.log('handleImageMessage start', new Date().toISOString());
   try {
+    console.log('fetchImageContent start', new Date().toISOString());
     const buffer = await fetchImageContent(event);
+    console.log('fetchImageContent end', new Date().toISOString());
 
+    console.log('readTextFromBuffer start', new Date().toISOString());
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
+    console.log('readTextFromBuffer end', new Date().toISOString());
+
+    console.log('extractTextArrayFromReadResults start', new Date().toISOString());
     const textArray = await extractTextArrayFromReadResults(readResults);
+    console.log('extractTextArrayFromReadResults end', new Date().toISOString());
+
     const textResult = textArray.join('\n');
+
     if (!isReceipt(textResult)) {
       throw new Error('レシートとしての特徴が不足しています。');
     }
 
+    console.log('convertOCRTextToJSON start', new Date().toISOString());
     const jsonResultString = await convertOCRTextToJSON(textResult);
+    console.log('convertOCRTextToJSON end', new Date().toISOString());
+
     const jsonResult = JSON.parse(jsonResultString);
+
+    console.log('getUserName start', new Date().toISOString());
     const userName = await getUserName(event);
+    console.log('getUserName end', new Date().toISOString());
+
     const nameMappings = {
       'Yuki Ikeda': 'YUKI',
       '五十嵐   陽唯': 'HARUI',
@@ -94,7 +111,10 @@ async function handleImageMessage(event) {
     const userReName = nameMappings[userName] || userName;
     jsonResult['ユーザー名'] = userName;
     jsonResult['変更ユーザー名'] = userReName;
+
+    console.log('replyToLine start', new Date().toISOString());
     await replyToLine(event, jsonResult);
+    console.log('replyToLine end', new Date().toISOString());
   } catch (err) {
     console.error(`画像メッセージの処理中にエラーが発生しました: ${err.message}`);
   }
