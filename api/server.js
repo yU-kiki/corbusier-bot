@@ -1,16 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const { google } = require('googleapis');
 const line = require('@line/bot-sdk');
-const { computerVisionClient, readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('./utilities');
+const { computerVisionClient, readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('../utilities');
+const { saveToSpreadSheet } = require('./spreadsheetService');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
-
-const spreadsheetId = process.env.SPREADSHEET_ID;
-const sheetName = '履歴';
 
 const app = express();
 
@@ -19,40 +16,11 @@ app.use(express.urlencoded({ extended: true }));
 
 const client = new line.Client(config);
 
-const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
-
-const googleSheetsInstance = google.sheets({ version: 'v4', auth });
-
 async function writeToSheet(jsonResult) {
-  const authClient = await auth.getClient();
-
-  const getRows = await googleSheetsInstance.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${sheetName}!B:B`,
-  });
-
-  const firstEmptyRow = getRows.data.values ? getRows.data.values.length + 1 : 1;
-
-  await googleSheetsInstance.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${sheetName}!B${firstEmptyRow}:G${firstEmptyRow}`,
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [
-        [
-          jsonResult['日時'],
-          `=if(${sheetName}!B${firstEmptyRow}="","", YEAR(${sheetName}!B${firstEmptyRow})*100+MONTH(${sheetName}!B${firstEmptyRow}))`,
-          jsonResult['変更ユーザー名'],
-          jsonResult['合計金額'],
-          jsonResult['項目'],
-          `【${jsonResult['店名']}】${jsonResult['明細'].slice(0, 3).map(item => item['商品名']).join('、')}など`,
-        ],
-      ],
-    },
-  });
+  const result = await saveToSpreadSheet(jsonResult);
+  if (result.status !== 200) {
+    throw new Error(result.message);
+  }
 }
 
 async function getUserName(event) {
@@ -141,6 +109,7 @@ async function handleImageMessage(event) {
 
 
 app.post('/webhook', line.middleware(config), (req, res) => {
+  console.log('Received request on /webhook.');
   Promise.all(req.body.events.map(handleImageMessage))
     .then(() => res.status(200).end())
     .catch((err) => {
@@ -150,6 +119,8 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server running on port ${port}`);
+// });
+(process.env.NOW_REGION) ? module.exports = app : app.listen(port);
+console.log(`Server running at ${port}`);
