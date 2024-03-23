@@ -74,7 +74,7 @@ async function fetchImageContent(event) {
 
 async function handleImageMessage(event) {
   try {
-    const buffer = await fetchImageContent(client, event.message.id);
+    const buffer = await fetchImageContent(event);
 
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
     const textArray = await extractTextArrayFromReadResults(readResults);
