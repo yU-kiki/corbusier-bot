@@ -43,7 +43,7 @@ function isReceipt(textResult) {
 
 async function convertOCRTextToJSON(content) {
   const messages = [
-    { "role": "system", "content": `あなたは返答をすべてJSON形式で出力します。出力フォーマットは { "店名": "...", "日時": "YYYY / MM / DD", "項目": ["食費", "生活費", "その他"]（どれか1つ） "明細": [{ "商品名": "...", "金額": "..." }]（３つ）, "合計金額": "..." } です。`},
+    { "role": "system", "content": `あなたは返答をすべてJSON形式で出力します。各項目の説明は以下の通りです。\n- "店名": 購入した店の名前\n- "日時": 購入日時 (YYYY/MM/DD 形式)\n- "項目": 購入したもののカテゴリー。"食費"、"生活費"、"その他"のうち1つを選んでください。\n- "明細": 購入した商品のリスト。各商品は {"商品名": "...", "金額": "..."} の形式で、最大3つまで。\n- "合計金額": 購入した商品の合計金額\n\n出力フォーマットは次の通りです。\n{ "店名": "...", "日時": "YYYY/MM/DD", "項目": "食費/生活費/その他", "明細": [{ "商品名": "...", "金額": "..." }], "合計金額": "..." }` },
     { "role": "user", "content": content },
   ]
   const response = await openai.chat.completions.create({
