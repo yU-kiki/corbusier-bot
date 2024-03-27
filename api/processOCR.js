@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { convertOCRTextToJSON } = require('../utilities/textExtraction');
+const { convertOCRTextToJSON } = require('../src/utilities/textExtraction');
 const { replyToLine } = require('../src/handlers/eventHandler');
 
 const app = express();
