@@ -47,13 +47,14 @@ async function convertOCRTextToJSON(content) {
     messages: [
       {
         role: "system",
-        content: "テキストをJSON形式で出力してください。出力フォーマットは { '店名': '...', '日時': 'YYYY/MM/DD', '項目': ['食費', '生活費', 'その他'], '明細': [{ '商品名': '...', '金額': ... }], '合計金額': ... } です。",
+        content: `テキストをJSON形式で出力してください。出力フォーマットは { "店名": "...", "日時": "YYYY/MM/DD", "項目": ["食費", "生活費", "その他"] "明細": [{ "商品名": "...", "金額": "..." }], "合計金額": "..." } です。`,
       },
       { role: "user", content: content },
     ],
   });
 
   const answerOpenAI = await response.choices[0].message?.content;
+  console.log(answerOpenAI);
   return answerOpenAI;
 }
 
