@@ -74,26 +74,25 @@ async function fetchImageContent(event) {
 }
 
 async function handleImageMessage(event) {
-  const start = new Date();
-  console.log(`handleImageMessage start: ${start.toISOString()}`);
+  console.log(`handleImageMessage start: ${new Date().toISOString()}`);
 
   try {
-    console.log(`START:fetchImageContent${start.toISOString()}`);
+    console.log(`START:fetchImageContent${new Date().toISOString()}`);
     const buffer = await fetchImageContent(event);
-    console.log(`END:fetchImageContent${start.toISOString()}`);
-    console.log(`START:readTextFromBuffer${start.toISOString()}`);
+    console.log(`END:fetchImageContent${new Date().toISOString()}`);
+    console.log(`START:readTextFromBuffer${new Date().toISOString()}`);
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
-    console.log(`END:readTextFromBuffer${start.toISOString()}`);
-    console.log(`START:extractTextArrayFromReadResults${start.toISOString()}`);
+    console.log(`END:readTextFromBuffer${new Date().toISOString()}`);
+    console.log(`START:extractTextArrayFromReadResults${new Date().toISOString()}`);
     const textArray = await extractTextArrayFromReadResults(readResults);
-    console.log(`END:extractTextArrayFromReadResults${start.toISOString()}`);
+    console.log(`END:extractTextArrayFromReadResults${new Date().toISOString()}`);
     const textResult = textArray.join('\n');
 
     if (!isReceipt(textResult)) {
       throw new Error('レシートとしての特徴が不足しています。');
     }
 
-    console.log(`START:processOCR${start.toISOString()}`);
+    console.log(`START:processOCR${new Date().toISOString()}`);
     const userName = await getUserName(event);
     await fetch('https://corbusier-bot.vercel.app/processOCR', {
       method: 'POST',
@@ -102,7 +101,7 @@ async function handleImageMessage(event) {
       },
       body: JSON.stringify({ textResult, event, userName })
     });
-    console.log(`END:processOCR${start.toISOString()}`);
+    console.log(`END:processOCR${new Date().toISOString()}`);
 
   } catch (err) {
     console.error(`画像メッセージの処理中にエラーが発生しました: ${err.message}`);
