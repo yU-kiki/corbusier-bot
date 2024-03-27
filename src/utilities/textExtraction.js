@@ -47,7 +47,7 @@ async function convertOCRTextToJSON(content) {
     { "role": "user", "content": content },
   ]
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo-0613",
+    model: "gpt-3.5-turbo-1106",
     messages: messages,
     response_format: { "type": "json_object" },
     temperature: 0,
