@@ -46,13 +46,12 @@ async function convertOCRTextToJSON(content) {
     { "role": "system", "content": `あなたは返答をすべてJSON形式で出力します。出力フォーマットは { "店名": "...", "日時": "YYYY / MM / DD", "項目": ["食費", "生活費", "その他"]（どれか1つ） "明細": [{ "商品名": "...", "金額": "..." }]（３つ）, "合計金額": "..." } です。`},
     { "role": "user", "content": content },
   ]
-
-  response = await openai.chat.completions.create(
-    model = "gpt-3.5-turbo-0613",
-    response_format = { "type": "json_object" },
-    messages = messages,
-    temperature = 0,
-  )
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo-0613",
+    messages: messages,
+    response_format: { "type": "json_object" },
+    temperature: 0,
+  })
 
   const answerOpenAI = await response.choices[0].message?.content;
   console.log(answerOpenAI);
