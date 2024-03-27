@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/webhook", "dest": "api/server.js" }
+    { "src": "/webhook", "dest": "api/server.js" },
+    { "src": "/processOCR", "dest": "api/processOCR.js" }
   ]
 }
