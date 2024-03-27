@@ -42,7 +42,7 @@ function isReceipt(textResult) {
 }
 
 async function convertOCRTextToJSON(content) {
-  messages = [
+  const messages = [
     { "role": "system", "content": `あなたは返答をすべてJSON形式で出力します。出力フォーマットは { "店名": "...", "日時": "YYYY / MM / DD", "項目": ["食費", "生活費", "その他"]（どれか1つ） "明細": [{ "商品名": "...", "金額": "..." }]（３つ）, "合計金額": "..." } です。`},
     { "role": "user", "content": content },
   ]
