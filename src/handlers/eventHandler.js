@@ -46,7 +46,6 @@ async function writeToSheet(jsonResult) {
 }
 
 async function replyToLine(event, jsonResult) {
-  console.log('replyToLine start', new Date().toISOString());
   await writeToSheet(jsonResult);
 
   const mentionText = `@${jsonResult['ユーザー名']}`;
@@ -75,7 +74,9 @@ async function fetchImageContent(event) {
 }
 
 async function handleImageMessage(event) {
-  console.log('handleImageMessage start', new Date().toISOString());
+  const start = new Date();
+  console.log(`handleImageMessage start: ${start.toISOString()}`);
+
   try {
     const buffer = await fetchImageContent(event);
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
@@ -97,6 +98,10 @@ async function handleImageMessage(event) {
 
   } catch (err) {
     console.error(`画像メッセージの処理中にエラーが発生しました: ${err.message}`);
+  } finally {
+    const end = new Date();
+    console.log(`handleImageMessage end: ${end.toISOString()}`);
+    console.log(`Duration: ${end - start}ms`);
   }
 }
 

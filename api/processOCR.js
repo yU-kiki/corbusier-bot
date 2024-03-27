@@ -8,7 +8,9 @@ const app = express();
 app.use(express.json({ verify: (req, _, buf) => req.rawBody = buf }));
 
 app.post('/processOCR', async (req, res) => {
-  console.log('processOCR start', new Date().toISOString());
+  const start = new Date();
+  console.log(`Process OCR start: ${start.toISOString()}`);
+
   try {
     const { textResult, event, userName } = req.body;
     const jsonResultString = await convertOCRTextToJSON(textResult);
@@ -25,9 +27,15 @@ app.post('/processOCR', async (req, res) => {
 
     await replyToLine(event, jsonResult);
 
+    const end = new Date();
+    console.log(`Process OCR end: ${end.toISOString()}`);
+    console.log(`Duration: ${end - start}ms`);
     res.status(200).json({ message: 'OCR processing and line reply completed' });
   } catch (err) {
-    console.error(err);
+    const end = new Date();
+    console.error(`Error in Process OCR: ${err}`);
+    console.log(`Process OCR end with error: ${end.toISOString()}`);
+    console.log(`Duration: ${end - start}ms`);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

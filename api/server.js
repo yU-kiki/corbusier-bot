@@ -14,10 +14,21 @@ app.use(express.json({ verify: (req, _, buf) => req.rawBody = buf }));
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/webhook', line.middleware(config), (req, res) => {
+  const start = new Date();
+  console.log(`Webhook handling start: ${start.toISOString()}`);
+
   Promise.all(req.body.events.map(handleImageMessage))
-    .then(() => res.status(200).end())
+    .then(() => {
+      const end = new Date();
+      console.log(`Webhook handling end: ${end.toISOString()}`);
+      console.log(`Duration: ${end - start}ms`);
+      res.status(200).end();
+    })
     .catch((err) => {
-      console.error(err);
+      const end = new Date();
+      console.error(`Error during webhook handling: ${err}`);
+      console.log(`Webhook handling end with error: ${end.toISOString()}`);
+      console.log(`Duration: ${end - start}ms`);
       res.status(500).end();
     });
 });

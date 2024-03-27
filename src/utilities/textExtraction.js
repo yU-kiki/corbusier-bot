@@ -42,7 +42,6 @@ function isReceipt(textResult) {
 }
 
 async function convertOCRTextToJSON(content) {
-  console.log('convertOCRTextToJSON content:', content);
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-0613",
     messages: [
