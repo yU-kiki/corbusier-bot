@@ -54,7 +54,6 @@ async function convertOCRTextToJSON(content) {
   })
 
   const answerOpenAI = await response.choices[0].message?.content;
-  console.log(answerOpenAI);
   return answerOpenAI;
 }
 

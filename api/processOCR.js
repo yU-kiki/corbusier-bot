@@ -11,10 +11,7 @@ app.post('/processOCR', async (req, res) => {
 
   try {
     const { textResult, event, userName } = req.body;
-    const start = new Date();
     const jsonResultString = await convertOCRTextToJSON(textResult);
-    const end = new Date();
-    console.log(`convertOCRTextToJSON Processing Time: ${end - start}ms`);
     const jsonResult = JSON.parse(jsonResultString);
 
     const nameMappings = {
