@@ -78,15 +78,22 @@ async function handleImageMessage(event) {
   console.log(`handleImageMessage start: ${start.toISOString()}`);
 
   try {
+    console.log(`START:fetchImageContent${start.toISOString()}`);
     const buffer = await fetchImageContent(event);
+    console.log(`END:fetchImageContent${start.toISOString()}`);
+    console.log(`START:readTextFromBuffer${start.toISOString()}`);
     const readResults = await readTextFromBuffer(computerVisionClient, buffer);
+    console.log(`END:readTextFromBuffer${start.toISOString()}`);
+    console.log(`START:extractTextArrayFromReadResults${start.toISOString()}`);
     const textArray = await extractTextArrayFromReadResults(readResults);
+    console.log(`END:extractTextArrayFromReadResults${start.toISOString()}`);
     const textResult = textArray.join('\n');
 
     if (!isReceipt(textResult)) {
       throw new Error('レシートとしての特徴が不足しています。');
     }
 
+    console.log(`START:processOCR${start.toISOString()}`);
     const userName = await getUserName(event);
     await fetch('https://corbusier-bot.vercel.app/processOCR', {
       method: 'POST',
@@ -95,13 +102,10 @@ async function handleImageMessage(event) {
       },
       body: JSON.stringify({ textResult, event, userName })
     });
+    console.log(`END:processOCR${start.toISOString()}`);
 
   } catch (err) {
     console.error(`画像メッセージの処理中にエラーが発生しました: ${err.message}`);
-  } finally {
-    const end = new Date();
-    console.log(`handleImageMessage end: ${end.toISOString()}`);
-    console.log(`Duration: ${end - start}ms`);
   }
 }
 

@@ -26,10 +26,6 @@ app.post('/processOCR', async (req, res) => {
     jsonResult['変更ユーザー名'] = userReName;
 
     await replyToLine(event, jsonResult);
-
-    const end = new Date();
-    console.log(`Process OCR end: ${end.toISOString()}`);
-    console.log(`Duration: ${end - start}ms`);
     res.status(200).json({ message: 'OCR processing and line reply completed' });
   } catch (err) {
     const end = new Date();

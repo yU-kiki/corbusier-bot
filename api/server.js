@@ -19,16 +19,10 @@ app.post('/webhook', line.middleware(config), (req, res) => {
 
   Promise.all(req.body.events.map(handleImageMessage))
     .then(() => {
-      const end = new Date();
-      console.log(`Webhook handling end: ${end.toISOString()}`);
-      console.log(`Duration: ${end - start}ms`);
       res.status(200).end();
     })
     .catch((err) => {
-      const end = new Date();
       console.error(`Error during webhook handling: ${err}`);
-      console.log(`Webhook handling end with error: ${end.toISOString()}`);
-      console.log(`Duration: ${end - start}ms`);
       res.status(500).end();
     });
 });
