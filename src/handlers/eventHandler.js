@@ -46,6 +46,7 @@ async function writeToSheet(jsonResult) {
 }
 
 async function replyToLine(event, jsonResult) {
+  console.log('replyToLine start', new Date().toISOString());
   await writeToSheet(jsonResult);
 
   const mentionText = `@${jsonResult['ユーザー名']}`;
@@ -99,4 +100,4 @@ async function handleImageMessage(event) {
   }
 }
 
-module.exports = { handleImageMessage };
+module.exports = { handleImageMessage, replyToLine };

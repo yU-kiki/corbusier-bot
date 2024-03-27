@@ -14,7 +14,6 @@ app.use(express.json({ verify: (req, _, buf) => req.rawBody = buf }));
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/webhook', line.middleware(config), (req, res) => {
-  console.log('Received webhook event', new Date().toISOString());
   Promise.all(req.body.events.map(handleImageMessage))
     .then(() => res.status(200).end())
     .catch((err) => {

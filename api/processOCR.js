@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json({ verify: (req, _, buf) => req.rawBody = buf }));
 
 app.post('/processOCR', async (req, res) => {
+  console.log('processOCR start', new Date().toISOString());
   try {
     const { textResult, event, userName } = req.body;
     const jsonResultString = await convertOCRTextToJSON(textResult);
