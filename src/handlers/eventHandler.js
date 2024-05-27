@@ -63,6 +63,25 @@ async function replyToLine(event, jsonResult) {
   });
 }
 
+async function handleTextMessage(event) {
+  try {
+    const messageText = event.message.text;
+    let inputMessage = messageText;
+
+    if (messageText.startsWith('@はお君')) {
+      inputMessage = messageText.slice(5).trim();
+    }
+    const replyMessage = `「${inputMessage}」と言いましたね。`;
+
+    await client.replyMessage(event.replyToken, {
+      type: 'text',
+      text: replyMessage
+    });
+  } catch (err) {
+    console.error(`テキストメッセージの処理中にエラーが発生しました: ${err.message}`);
+  }
+}
+
 async function fetchImageContent(event) {
   const stream = await client.getMessageContent(event.message.id);
   const buffers = [];
@@ -98,4 +117,4 @@ async function handleImageMessage(event) {
   }
 }
 
-module.exports = { handleImageMessage, replyToLine };
+module.exports = { handleTextMessage, handleImageMessage, replyToLine };
