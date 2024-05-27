@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const { readTextFromBuffer, extractTextArrayFromReadResults, isReceipt } = require('../utilities/textExtraction');
 const { saveToSpreadSheet } = require('../services/spreadsheetService');
 const { computerVisionClient } = require('../clients/computerVisionClient');
-const { chatWithOpenAI } = require('../src/utilities/textExtraction');
+const { chatWithOpenAI } = require('../utilities/textExtraction');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
