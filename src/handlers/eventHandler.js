@@ -1,8 +1,9 @@
 const line = require('@line/bot-sdk');
 const fetch = require('node-fetch');
-const { readTextFromBuffer, extractTextArrayFromReadResults, isReceipt, convertOCRTextToJSON } = require('../utilities/textExtraction');
+const { readTextFromBuffer, extractTextArrayFromReadResults, isReceipt } = require('../utilities/textExtraction');
 const { saveToSpreadSheet } = require('../services/spreadsheetService');
 const { computerVisionClient } = require('../clients/computerVisionClient');
+const { chatWithOpenAI } = require('../src/utilities/textExtraction');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -64,21 +65,17 @@ async function replyToLine(event, jsonResult) {
 }
 
 async function handleTextMessage(event) {
-  try {
-    const messageText = event.message.text;
-    let inputMessage = messageText;
+  const messageText = event.message.text;
 
-    if (messageText.startsWith('@はお君')) {
-      inputMessage = messageText.slice(5).trim();
-    }
-    const replyMessage = `「${inputMessage}」と言いましたね。`;
+  if ((messageText.startsWith('@') || messageText.startsWith('＠')) &&
+    messageText[1] === 'は' && messageText[2] === 'お') {
+    const inputMessage = messageText;
 
+    const replyMessage = chatWithOpenAI(inputMessage);
     await client.replyMessage(event.replyToken, {
       type: 'text',
       text: replyMessage
     });
-  } catch (err) {
-    console.error(`テキストメッセージの処理中にエラーが発生しました: ${err.message}`);
   }
 }
 

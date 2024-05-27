@@ -57,9 +57,25 @@ async function convertOCRTextToJSON(content) {
   return answerOpenAI;
 }
 
+async function chatWithOpenAI(content) {
+  const messages = [
+    { "role": "system", "content": `あなたはこの家の家政婦としてよく働いている「はお君」です。以下の主人からの発言に対し、ユーモアのある文章で端的に返してください。` },
+    { "role": "user", "content": content },
+  ]
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-2024-05-13",
+    messages: messages,
+    temperature: 0,
+  })
+
+  const answerOpenAI = await response.choices[0].message?.content;
+  return answerOpenAI;
+}
+
 module.exports = {
   readTextFromBuffer,
   extractTextArrayFromReadResults,
   isReceipt,
-  convertOCRTextToJSON
+  convertOCRTextToJSON,
+  chatWithOpenAI
 };
