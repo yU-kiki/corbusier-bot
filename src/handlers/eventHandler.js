@@ -71,7 +71,7 @@ async function handleTextMessage(event) {
     messageText[1] === 'は' && messageText[2] === 'お') {
     const inputMessage = messageText;
 
-    const replyMessage = chatWithOpenAI(inputMessage);
+    const replyMessage = await chatWithOpenAI(inputMessage);
     await client.replyMessage(event.replyToken, {
       type: 'text',
       text: replyMessage
