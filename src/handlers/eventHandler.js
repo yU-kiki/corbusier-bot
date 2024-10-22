@@ -2,8 +2,9 @@ const line = require('@line/bot-sdk');
 const fetch = require('node-fetch');
 const { readTextFromBuffer, extractTextArrayFromReadResults, isReceipt } = require('../utilities/textExtraction');
 const { saveToSpreadSheet } = require('../services/spreadsheetService');
+const { addToCalendar } = require('../services/calendarService');
 const { computerVisionClient } = require('../clients/computerVisionClient');
-const { chatWithOpenAI } = require('../utilities/textExtraction');
+const { chatWithOpenAI, extractFriendVisitInfo } = require('../utilities/textExtraction');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -69,9 +70,33 @@ async function handleTextMessage(event) {
 
   if ((messageText.startsWith('@') || messageText.startsWith('＠')) &&
     messageText[1] === 'は' && messageText[2] === 'お') {
-    const inputMessage = messageText;
+    const inputMessage = messageText.split('\n')[1];
+    
+    const nameMappings = {
+      'Yuki Ikeda': 'ゆうき',
+      '五十嵐   陽唯': 'はるい',
+      'こう': 'こう'
+    };
+    const userName = await getUserName(event);
+    const userReName = nameMappings[userName] || userName;
 
-    const replyMessage = await chatWithOpenAI(inputMessage);
+    const jsonResultString = await extractFriendVisitInfo(inputMessage, userReName);
+    const jsonResult = JSON.parse(jsonResultString);
+    const calendarResult = await addToCalendar(jsonResult);
+
+    let replyMessage = "";
+    if (calendarResult.status !== 200) {
+      replyMessage = await chatWithOpenAI(inputMessage);
+    } else { 
+      replyMessage = `@${jsonResult['host']}\n` +
+        `${jsonResult['comment']}\n` +
+        `【日付】${jsonResult['date']}\n` +
+        `【期間】${jsonResult['stayDays']}\n` +
+        `【泊まり】${jsonResult['overnight']}\n` +
+        `【友達】${jsonResult['friends']}\n` +
+        `【メモ】${jsonResult['memo']}`;
+    }
+
     await client.replyMessage(event.replyToken, {
       type: 'text',
       text: replyMessage
