@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const line = require('@line/bot-sdk');
-const { handleTextMessage } = require('../src/handlers/eventHandler');
+// const { handleTextMessage } = require('../src/handlers/eventHandler');
 const { handleImageMessage } = require('../src/handlers/eventHandler');
 
 const config = {
@@ -18,9 +18,7 @@ app.post('/webhook', line.middleware(config), (req, res) => {
   const events = req.body.events;
 
   Promise.all(events.map(event => {
-    if (event.message.type === 'text') {
-      return handleTextMessage(event);
-    } else if (event.message.type === 'image') { 
+    if (event.message.type === 'image') { 
       return handleImageMessage(event);
     }
   }))

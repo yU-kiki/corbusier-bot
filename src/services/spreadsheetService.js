@@ -11,7 +11,13 @@ async function saveToSpreadSheet(jsonResult) {
 
     const googleSheetsInstance = google.sheets({ version: 'v4', auth });
 
-    const spreadsheetId = process.env.SPREADSHEET_ID;
+    let spreadsheetId = "";
+
+    if (jsonResult['変更ユーザー名'] === 'YUDAI' || jsonResult['変更ユーザー名'] === 'YUKI') {
+      spreadsheetId = "1cn7eQawyZKW1EVLrLPW7OHyutFh55FJlJYRMAb8zxls";
+    } else {
+      spreadsheetId = process.env.SPREADSHEET_ID;
+    }
     const sheetName = '履歴';
 
     const getRows = await googleSheetsInstance.spreadsheets.values.get({

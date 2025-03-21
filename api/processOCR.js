@@ -17,7 +17,9 @@ app.post('/processOCR', async (req, res) => {
     const nameMappings = {
       'Yuki Ikeda': 'YUKI',
       '五十嵐   陽唯': 'HARUI',
-      'こう': 'KOH'
+      'こう': 'KOH',
+      '山口暁帆': 'AKIHO',
+      'yudai': 'YUDAI'
     };
     const userReName = nameMappings[userName] || userName;
     jsonResult['ユーザー名'] = userName;
