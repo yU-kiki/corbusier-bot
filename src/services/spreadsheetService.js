@@ -13,7 +13,7 @@ async function saveToSpreadSheet(jsonResult) {
 
     let spreadsheetId = "";
 
-    if (jsonResult['変更ユーザー名'] === 'YUDAI' || jsonResult['変更ユーザー名'] === 'YUKI') {
+    if (jsonResult['変更ユーザー名'] === 'YUDAI' || jsonResult['変更ユーザー名'] === 'AKIHO') {
       spreadsheetId = "1cn7eQawyZKW1EVLrLPW7OHyutFh55FJlJYRMAb8zxls";
     } else {
       spreadsheetId = process.env.SPREADSHEET_ID;
